@@ -2,7 +2,6 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/django-site-settings)](https://pypi.org/project/django-site-settings/)
 [![Python Versions](https://img.shields.io/pypi/pyversions/django-site-settings)](https://pypi.org/project/django-site-settings/)
-[![Django Versions](https://img.shields.io/pypi/djversions/django-site-settings)](https://pypi.org/project/django-site-settings/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](https://opensource.org/licenses/MIT)
 
 **Django Site Settings** is a reusable Django application designed to manage dynamic, type-safe global configurations directly from the Django Admin panel. Built on top of [django-solo](https://github.com/lazybird/django-solo), it guarantees a singleton pattern for your core settings while offering an advanced, customizable caching layer.
