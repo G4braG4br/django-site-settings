@@ -9,8 +9,8 @@ description = "Dynamic site settings for Django with caching"
 authors = ["Gabriel Osipov <g4brag4br@gmail.com>"]
 readme = "README.md"
 license = "MIT"
-homepage = "https://github.com/yourusername/django-site-settings"
-repository = "https://github.com/yourusername/django-site-settings.git"
+homepage = "https://github.com/G4braG4br/django-site-settings"
+repository = "https://github.com/G4braG4br/django-site-settings.git"
 keywords = ["django", "settings", "configuration", "singleton", "cache"]
 classifiers = [
     "Development Status :: 4 - Beta",
