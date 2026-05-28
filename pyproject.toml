@@ -4,7 +4,6 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "django-site-settings"
-version = "0.1.0"
 description = "Dynamic site settings for Django with caching"
 authors = ["Gabriel Osipov <g4brag4br@gmail.com>"]
 readme = "README.md"
@@ -24,6 +23,11 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
+
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+style = "semver"
 
 [tool.poetry.dependencies]
 python = "^3.10"
