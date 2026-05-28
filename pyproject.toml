@@ -1,0 +1,31 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "django-site-settings"
+version = "0.1.0"
+description = "Dynamic site settings for Django with caching"
+authors = ["Gabriel Osipov <g4brag4br@gmail.com>"]
+readme = "README.md"
+license = "MIT"
+homepage = "https://github.com/yourusername/django-site-settings"
+repository = "https://github.com/yourusername/django-site-settings.git"
+keywords = ["django", "settings", "configuration", "singleton", "cache"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Django",
+    "Framework :: Django :: 5.0",
+    "Framework :: Django :: 6.0",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django = ">=5.0"
+django-solo = ">=2.3.0"
