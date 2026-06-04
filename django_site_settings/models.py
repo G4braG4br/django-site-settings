@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from solo.models import SingletonModel
 from django.core.cache import cache
 from django.utils import timezone
+from django.contrib.auth.models import Group as DjangoGroup
 
 
 class DataType(models.TextChoices):
@@ -146,3 +147,82 @@ class SiteAnnouncement(models.Model):
             "level": self.level,
             "updated_at": self.updated_at.timestamp(),
         }
+
+
+class SettingAccessGroup(models.Model):
+    name = models.CharField(_("Group Name"), max_length=100, unique=True)
+
+    django_groups = models.ManyToManyField(
+        DjangoGroup,
+        through='GroupDjangoGroupRelation',
+        related_name='setting_access_groups',
+        related_query_name='setting_access_group',
+        verbose_name=_("Django Groups"),
+        blank=True,
+        null=True,
+    )
+    setting_items = models.ManyToManyField(
+        'AppSetting',
+        through='GroupSettingItemRelation',
+        related_name='setting_access_groups',
+        related_query_name='setting_access_group',
+        verbose_name=_("Setting Items"),
+        blank=True,
+        null=True,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "setting_access_groups"
+        verbose_name = _("Setting Access Group")
+        verbose_name_plural = _("Setting Access Groups")
+
+    def __str__(self):
+        return self.name
+
+
+class GroupDjangoGroupRelation(models.Model):
+    access_group = models.ForeignKey(
+        SettingAccessGroup,
+        on_delete=models.CASCADE,
+        related_name='django_group_relations',
+        related_query_name='django_group_relation',
+    )
+    django_group = models.ForeignKey(
+        DjangoGroup,
+        on_delete=models.CASCADE,
+        related_name='django_group_relations',
+        related_query_name='django_group_relation',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "setting_django_group_relation"
+        unique_together = ('access_group', 'django_group')
+        verbose_name = _("Setting django group relations")
+        verbose_name_plural = _("Setting django group relation")
+
+
+class GroupSettingItemRelation(models.Model):
+    access_group = models.ForeignKey(
+        SettingAccessGroup,
+        on_delete=models.CASCADE,
+        related_name='setting_item_relations',
+        related_query_name='setting_item_relation',
+    )
+    setting_item = models.ForeignKey(
+        'AppSetting',
+        on_delete=models.CASCADE,
+        related_name='setting_item_relations',
+        related_query_name='setting_item_relation',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "setting_group_item_relations"
+        unique_together = ('access_group', 'setting_item')
+        verbose_name = _("Setting group item relations")
+        verbose_name_plural = _("Setting group item relation")
