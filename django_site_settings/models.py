@@ -2,13 +2,21 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from solo.models import SingletonModel
+from django.core.cache import cache
+from django.utils import timezone
 
 
 class DataType(models.TextChoices):
-    STRING = 'string', _('String')
-    INTEGER = 'integer', _('Integer')
-    FLOAT = 'float', _('Float')
-    BOOLEAN = 'boolean', _('Boolean')
+    STRING = "string", _("String")
+    INTEGER = "integer", _("Integer")
+    FLOAT = "float", _("Float")
+    BOOLEAN = "boolean", _("Boolean")
+
+
+class LevelChoices(models.TextChoices):
+    INFO = "info", _("Information")
+    WARNING = "warning", _("Warning")
+    DANGER = "danger", _("Critical Alert")
 
 
 class Settings(SingletonModel):
@@ -64,3 +72,77 @@ class AppSetting(models.Model):
                 raise ValidationError({
                     'value': _("The entered value does not match the selected data type.")
                 })
+
+
+class AnnouncementQuerySet(models.QuerySet):
+    def active(self):
+        now = timezone.now()
+        return self.filter(
+            is_active=True,
+            start_at__lte=now,
+            end_at__gte=now
+        ).order_by('-priority', '-created_at')
+
+
+class SiteAnnouncement(models.Model):
+    SITE_ANNOUNCEMENT_CACHE_KEY = "active_site_announcement"
+    title = models.CharField(
+        max_length=255,
+        help_text=_("Internal title used only within the Django Admin panel.")
+    )
+    text = models.TextField(
+        help_text=_("The announcement message body. Supports plain text or raw HTML raw tags.")
+    )
+    level = models.CharField(
+        max_length=10,
+        choices=LevelChoices.choices,
+        default=LevelChoices.INFO,
+        help_text=_("The visual urgency level of the banner, mapping to bootstrap/tailwind alert classes.")
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        help_text=_("Global visibility toggle for this specific announcement.")
+    )
+    start_at = models.DateTimeField(
+        default=timezone.now,
+        help_text=_("The exact date and time when the banner should start displaying.")
+    )
+    end_at = models.DateTimeField(
+        help_text=_("The exact date and time when the banner should be automatically hidden.")
+    )
+
+    priority = models.IntegerField(
+        default=0,
+        help_text=_(
+            "If multiple announcements are active simultaneously, the one with the highest priority displays first."
+        )
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    objects = AnnouncementQuerySet.as_manager()
+
+    class Meta:
+        db_table = "site_announcements"
+        verbose_name = "Site Announcement"
+        verbose_name_plural = "Site Announcements"
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        cache.delete("active_site_announcement")
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        cache.delete("active_site_announcement")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "text": self.text,
+            "level": self.level,
+            "updated_at": self.updated_at.timestamp(),
+        }

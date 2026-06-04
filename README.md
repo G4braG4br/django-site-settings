@@ -123,3 +123,58 @@ Load the custom template tags to output values natively inside your HTML files:
     {% endif %}
 </footer>
 ```
+
+## Advanced Features: Global Site Announcements
+
+The `django-site-settings` package includes a built-in notification engine powered by the `SiteAnnouncement` model. This feature allows administrators to broadcast multiple urgent alerts, maintenance windows, or marketing banners across the platform simultaneously, mimicking enterprise-tier SaaS announcement architectures.
+
+### Key Highlights
+* **Stacked Alerts Support**: Display multiple active notifications at once.
+* **Smart Priority Sorting**: Announcements are automatically arranged based on a customizable `priority` scale (e.g., critical `danger` alerts float to the top).
+* **Automated Lifecycles**: Schedule banners to activate (`start_at`) and expire (`end_at`) autonomously.
+* **Data-Level Caching**: Active records are evaluated into a memory-efficient Python list layer and cached (`cache.get`/`cache.set`), reducing database serialization overhead down to zero under high concurrent traffic.
+* **Instant Cache Invalidation**: Overridden `save()` and `delete()` model hooks flush the cache immediately when an administrator updates or removes a record.
+* **Hybrid Frontend Integration**: Choose between native Django Template Tags or a lightweight REST API endpoint.
+* **Independent Client-side Dismissal**: Users can close individual banners. Closure states are safely tracked in browser `localStorage` using individual record IDs and atomic version timestamps (`updated_at`) to avoid redundant database or session overhead.
+
+---
+
+### Implementation Guide
+
+#### 1. Integration via REST API (SPA / Headless Architecture)
+### Step A: Include Routing
+Register the library's URL patterns inside your root Django urls.py configuration:
+
+```python
+from django.urls import path, include
+
+urlpatterns = [
+    # ... your core project routes
+    path("site-settings/", include("django_site_settings.urls")),
+]
+```
+
+### Step B: Consume the Endpoint
+Your frontend application can fetch or poll from the following cache-backed public URI:
+GET /site-settings/api/announcements/
+
+Example JSON Response Payload:
+
+```json
+{
+  "announcements": [
+    {
+      "id": 4,
+      "text": "<strong>Urgent:</strong> Scheduled system upgrade on June 8th at 03:00 UTC.",
+      "level": "danger",
+      "updated_at": 1780920000.0
+    },
+    {
+      "id": 2,
+      "text": "Check out our new metrics dashboard module!",
+      "level": "info",
+      "updated_at": 1780845200.0
+    }
+  ]
+}
+```
