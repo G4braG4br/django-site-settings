@@ -73,13 +73,35 @@ SITE_SETTINGS_CACHE_TIMEOUT = 86400  # 24 hours
 SITE_SETTINGS_CACHE_ALIAS = "fast_redis"
 ```
 
+## Integration with `django-admin-reorder`
+
+If you are using custom admin menu managers like `django-admin-reorder` to clean up your Django Admin sidebar, you need to explicitly list all three models provided by this package under your custom app layout. 
+
+Add the following configuration block to your `settings.py`:
+
+```python
+ADMIN_REORDER = [
+    # ... your other apps ...
+    {
+        "app": "django_site_settings",
+        "label": "Site Settings Engine",
+        "models": (
+            "django_site_settings.Settings",
+            "django_site_settings.SiteAnnouncement",
+            "django_site_settings.SettingAccessGroup",
+        ),
+    },
+]
+```
+
 ## Usage
 ### Admin Panel Interface
 Once installed and configured, a new section called Site Settings Engine will automatically appear in your main Django administration index:
 
 <p align="center">
-<img width="800" style="max-width: 100%;" alt="image_usage_1" src="https://github.com/user-attachments/assets/4910cb55-9bdb-4682-9832-bfdc9b9ca5df" />
+<img width="800" style="max-width: 100%;" alt="image_usage_1" src="https://github.com/user-attachments/assets/9409819c-9d88-4432-927c-c8f1011df9c9" />
 </p>
+
 
 Global Configuration Management
 Clicking on Global Configuration provides a clean, unified dashboard where you can manage all custom variables as transactional setting items.
@@ -87,14 +109,16 @@ Clicking on Global Configuration provides a clean, unified dashboard where you c
 Empty State: Upon initialization, the dashboard presents a clean tabular inline structure layout, ready for keys assignment:
 
 <p align="center">
-<img width="800" style="max-width: 100%;" alt="image_usage_2" src="https://github.com/user-attachments/assets/9b5d8e61-ecb6-4350-a602-d4221019f3b9" />
+<img width="800" style="max-width: 100%;" alt="image_usage_2" src="https://github.com/user-attachments/assets/a670b509-a1fb-4417-aac3-f5050407fe94" />
 </p>
+
 
 Populated State with Validation: You can dynamically add keys, provide descriptive notes for your team, select strict target data types (e.g., Boolean, Float), and input their corresponding values natively:
 
 <p align="center">
-<img width="800" style="max-width: 100%;" alt="image_usage_3" src="https://github.com/user-attachments/assets/a50db3b3-40a8-4fe9-8ec6-286d3b5bcf32" />
+<img width="800" style="max-width: 100%;" alt="image_usage_3" src="https://github.com/user-attachments/assets/f2ee2f87-de12-4283-a240-0a915bc51c34" />
 </p>
+
 
 ### Fetching Settings in Python Code 
 Use the get_setting utility function anywhere in your Python business logic (services, models, tasks, or utilities) with automatic type conversion:
@@ -182,3 +206,19 @@ Example JSON Response Payload:
   ]
 }
 ```
+
+## Role-Based Access Control (RBAC)
+
+For projects with hundreds of settings, you can dynamically restrict which configurations are visible and editable by specific groups of staff members (e.g., Marketing, DevOps, Support).
+
+The package uses an explicit **Entity-Attribute-Value (EAV)** approach combined with Django's native `auth.Group` model via structured through-tables. Non-superuser staff will only see the configuration items explicitly assigned to their roles.
+
+### Configuration via Django Admin
+
+1. **Create Access Groups**: Go to **Setting Access Groups** in the Django Admin.
+2. **Assign Staff Roles**: Select the standard Django user groups that should inherit these permissions.
+3. **Map Settings**: Choose the explicit `AppSetting` records that these groups are authorized to manage.
+
+When a restricted user opens the **Global Configuration** singleton panel, the under-the-hood `get_formset` interceptor dynamically filters database queries. Unauthorized settings are completely hidden from the user's view, preventing accidental overrides of critical production values.
+
+
