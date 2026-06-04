@@ -77,20 +77,24 @@ SITE_SETTINGS_CACHE_ALIAS = "fast_redis"
 ### Admin Panel Interface
 Once installed and configured, a new section called Site Settings Engine will automatically appear in your main Django administration index:
 
-<img width="1280" height="466" alt="image_usage_1" src="https://github.com/user-attachments/assets/4910cb55-9bdb-4682-9832-bfdc9b9ca5df" />
+<p align="center">
+<img width="800" style="max-width: 100%;" alt="image_usage_1" src="https://github.com/user-attachments/assets/4910cb55-9bdb-4682-9832-bfdc9b9ca5df" />
+</p>
 
 Global Configuration Management
 Clicking on Global Configuration provides a clean, unified dashboard where you can manage all custom variables as transactional setting items.
 
 Empty State: Upon initialization, the dashboard presents a clean tabular inline structure layout, ready for keys assignment:
 
-<img width="1512" height="607" alt="image_usage_2" src="https://github.com/user-attachments/assets/9b5d8e61-ecb6-4350-a602-d4221019f3b9" />
-
+<p align="center">
+<img width="800" style="max-width: 100%;" alt="image_usage_2" src="https://github.com/user-attachments/assets/9b5d8e61-ecb6-4350-a602-d4221019f3b9" />
+</p>
 
 Populated State with Validation: You can dynamically add keys, provide descriptive notes for your team, select strict target data types (e.g., Boolean, Float), and input their corresponding values natively:
 
-<img width="1512" height="668" alt="image_usage_3" src="https://github.com/user-attachments/assets/a50db3b3-40a8-4fe9-8ec6-286d3b5bcf32" />
-
+<p align="center">
+<img width="800" style="max-width: 100%;" alt="image_usage_3" src="https://github.com/user-attachments/assets/a50db3b3-40a8-4fe9-8ec6-286d3b5bcf32" />
+</p>
 
 ### Fetching Settings in Python Code 
 Use the get_setting utility function anywhere in your Python business logic (services, models, tasks, or utilities) with automatic type conversion:
