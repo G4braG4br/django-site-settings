@@ -1,6 +1,8 @@
 from django.contrib import admin
 from solo.admin import SingletonModelAdmin
 from .models import Settings, AppSetting, SiteAnnouncement, SettingAccessGroup, GroupDjangoGroupRelation, GroupSettingItemRelation
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 
 class GroupDjangoGroupInline(admin.TabularInline):
@@ -16,7 +18,6 @@ class GroupSettingItemInline(admin.TabularInline):
 class AppSettingInline(admin.TabularInline):
     model = AppSetting
     extra = 0
-    fields = ('key', 'description', 'data_type', 'value')
 
     def get_formset(self, request, obj=None, **kwargs):
         formset = super().get_formset(request, obj, **kwargs)
@@ -31,11 +32,31 @@ class AppSettingInline(admin.TabularInline):
 
                 user_groups = request.user.groups.all()
 
-                allowed_settings = AppSetting.objects.filter(
+                self.allowed_settings = AppSetting.objects.filter(
                     setting_access_group__django_groups__in=user_groups
                 ).distinct()
 
-                self.queryset = self.queryset.filter(id__in=allowed_settings)
+                self.queryset = self.queryset.filter(id__in=self.allowed_settings)
+
+            def clean(self):
+                super().clean()
+
+                if request.user.is_superuser:
+                    return
+
+                allowed_ids = set(self.allowed_settings.values_list('id', flat=True))
+
+                for form in self.forms:
+                    if not form.cleaned_data or form in self.deleted_forms:
+                        continue
+
+                    instance = form.instance
+
+                    if instance.pk and instance.pk not in allowed_ids:
+                        raise ValidationError(
+                            _("You do not have permission to modify the setting: %(key)s"),
+                            params={'key': instance.key},
+                        )
 
         return FormsetWithRequest
 
