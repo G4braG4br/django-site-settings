@@ -169,7 +169,7 @@ The `django-site-settings` package includes a built-in notification engine power
 
 ### Implementation Guide
 
-#### 1. Integration via REST API (SPA / Headless Architecture)
+#### Integration via REST API (SPA / Headless Architecture)
 ### Step A: Include Routing
 Register the library's URL patterns inside your root Django urls.py configuration:
 
@@ -222,3 +222,20 @@ The package uses an explicit **Entity-Attribute-Value (EAV)** approach combined 
 When a restricted user opens the **Global Configuration** singleton panel, the under-the-hood `get_formset` interceptor dynamically filters database queries. Unauthorized settings are completely hidden from the user's view, preventing accidental overrides of critical production values.
 
 
+### Security & HTML Sanitization
+
+To allow rich-text formatting (such as links, bold text, lists, and headings) in backend-driven banners while maintaining strict security boundaries, the `SiteAnnouncement.text` field uses a custom `SanitizedHTMLField`.
+
+This field eliminates the risk of **Stored Cross-Site Scripting (XSS)** attacks. Whenever an announcement is saved, the library automatically intercepts the input and strips out malicious scripts, dangerous handlers (e.g., `onerror`, `onclick`), and unauthorized tags before they can ever reach your PostgreSQL database.
+
+### Under the Hood
+
+The sanitization engine is powered by **`nh3`** (a lightning-fast, secure HTML sanitizer built on top of Rust's `ammonia` library - https://pypi.org/project/nh3/). 
+
+```python
+DEFAULT_ALLOWED_TAGS = {"a", "b", "i", "strong", "em", "p", "br", "span", "ul", "ol", "li", "h1", "h2", "h3"}
+DEFAULT_ALLOWED_ATTRIBUTES = {
+    "a": {"href", "title", "target"},
+    "span": {"class", "style"},
+}
+```

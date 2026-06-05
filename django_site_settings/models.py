@@ -5,6 +5,7 @@ from solo.models import SingletonModel
 from django.core.cache import cache
 from django.utils import timezone
 from django.contrib.auth.models import Group as DjangoGroup
+from django_site_settings.fields import SanitizedHTMLField
 
 
 class DataType(models.TextChoices):
@@ -91,7 +92,7 @@ class SiteAnnouncement(models.Model):
         max_length=255,
         help_text=_("Internal title used only within the Django Admin panel.")
     )
-    text = models.TextField(
+    text = SanitizedHTMLField(
         help_text=_("The announcement message body. Supports plain text or raw HTML raw tags.")
     )
     level = models.CharField(
